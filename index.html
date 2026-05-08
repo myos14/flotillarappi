@@ -63,7 +63,7 @@
         letter-spacing: 1px; text-transform: uppercase;
         display: block; margin-bottom: 6px; margin-top: 16px;
     }
-    input {
+    input, select {
         width: 100%; background: var(--dark);
         border: 1px solid var(--border);
         border-radius: 10px; padding: 12px 14px;
@@ -71,7 +71,7 @@
         font-size: 14px; outline: none;
         transition: border-color 0.2s;
     }
-    input:focus { border-color: var(--red); }
+    input:focus, select:focus { border-color: var(--red); }
     .btn-primary {
         width: 100%; margin-top: 24px; padding: 14px;
         background: var(--red); color: #fff; border: none;
@@ -79,6 +79,7 @@
         font-size: 15px; font-weight: 700; cursor: pointer;
         transition: opacity 0.2s;
     }
+    select { appearance: none; cursor: pointer; }
     .btn-primary:hover { opacity: 0.88; }
     .auth-msg {
         font-size: 12px; text-align: center;
@@ -253,7 +254,7 @@
 <!-- ── AUTH ─────────────────────────────────────────────── -->
 <div id="auth-section" class="auth-wrap">
     <div class="auth-box">
-        <div class="auth-logo">🛵 FlotiQR</div>
+        <div class="auth-logo">RappiPapas</div>
         <div class="auth-sub">Panel de jefe de flotilla</div>
         <div class="auth-tabs">
             <button class="auth-tab active" onclick="switchTab('login')">Iniciar sesión</button>
@@ -263,7 +264,7 @@
         <!-- LOGIN -->
         <div id="tab-login">
             <label>Correo electrónico</label>
-            <input type="email" id="login-email" placeholder="jefe@correo.com">
+            <input type="email" id="login-email" placeholder="ejemplo@gmail.com">
             <label>Contraseña</label>
             <input type="password" id="login-pass" placeholder="••••••••">
             <button class="btn-primary" onclick="doLogin()">Entrar</button>
@@ -271,26 +272,26 @@
             <p class="forgot-link" onclick="doResetPassword()">¿Olvidaste tu contraseña?</p>
         </div>
 
-        <!-- REGISTER -->
-        <div id="tab-register" class="hidden">
+        <!-- REGISTER --><div id="tab-register" class="hidden">
             <label>Nombre completo</label>
-            <input type="text" id="reg-name" placeholder="Tu nombre">
+            <input type="text" id="reg-name">
             <label>Correo electrónico</label>
-            <input type="email" id="reg-email" placeholder="jefe@correo.com">
+            <input type="email" id="reg-email">
             <label>Celular (para recibir ubicaciones)</label>
-            <input type="tel" id="reg-phone" placeholder="+52 55 0000 0000">
+            <input type="tel" id="reg-phone" placeholder="+52 22 2456 3382">
             <label>Contraseña</label>
             <input type="password" id="reg-pass" placeholder="Mínimo 8 caracteres">
             <button class="btn-primary" onclick="doRegister()">Crear cuenta</button>
             <p class="auth-msg" id="reg-msg"></p>
         </div>
+        
     </div>
 </div>
 
 <!-- ── RECOVERY (nueva contraseña tras link del correo) ── -->
 <div id="recovery-section" class="auth-wrap">
     <div class="auth-box">
-        <div class="auth-logo">🛵 FlotiQR</div>
+        <div class="auth-logo">RappiPapas</div>
         <div class="auth-sub">Elige una nueva contraseña</div>
         <label>Nueva contraseña</label>
         <input type="password" id="recovery-pass" placeholder="Mínimo 8 caracteres">
@@ -304,7 +305,7 @@
 <!-- ── APP ───────────────────────────────────────────────── -->
 <div id="app-section" class="hidden">
     <div class="topbar">
-        <div class="topbar-logo">🛵 FlotiQR</div>
+        <div class="topbar-logo">RappiPapas</div>
         <div class="topbar-right">
         <span class="topbar-user" id="user-email"></span>
         <button class="btn-logout" onclick="doLogout()">Salir</button>
@@ -332,20 +333,30 @@
         <div class="modal-title" id="modal-title">Nuevo Rider</div>
         <div class="modal-sub">Datos médicos visibles al escanear el QR de emergencia</div>
 
-        <label>Nombre completo *</label>
-        <input type="text" id="f-nombre" placeholder="Juan Pérez López" autocomplete="off">
+        <label>Nombre completo (obligatorio)</label>
+        <input type="text" id="f-nombre" autocomplete="off">
 
-        <label>Tipo de sangre *</label>
-        <input type="text" id="f-sangre" placeholder="A+, O-, B+, AB+…" autocomplete="off">
+        <label>Tipo de sangre (obligatorio)</label>
+        <select id="f-sangre">
+            <option value="" selected disabled>Selecciona un tipo de sangre</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+        </select>
 
         <label>Condiciones médicas</label>
-        <input type="text" id="f-condiciones" placeholder="Diabetes, hipertensión… o déjalo vacío">
+        <input type="text" id="f-condiciones" placeholder="Diabetes, hipertensión, etc.">
 
         <label>Medicamentos actuales</label>
-        <input type="text" id="f-medicamentos" placeholder="Metformina 850mg… o déjalo vacío">
+        <input type="text" id="f-medicamentos" placeholder="Metformina 850mg, etc.">
 
         <label>Alergias</label>
-        <input type="text" id="f-alergias" placeholder="Penicilina, látex… o déjalo vacío">
+        <input type="text" id="f-alergias" placeholder="Penicilina, pescado, etc.">
 
         <div class="modal-actions">
             <button class="btn-cancel" onclick="closeModal('rider-modal')">Cancelar</button>
@@ -373,7 +384,7 @@
 </div>
 
 <script>
-// ─── CONFIG — reemplaza con tus datos de Supabase ──────────────────
+// ─── CONFIG ──────────────────
 const SUPABASE_URL     = 'https://tabnqjplnxnestyvnkkf.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_1fLtXbTcUJG941cd9n2MxA_vhwOymdH';
 // URL pública donde vivirá rider.html (GitHub Pages)
@@ -588,7 +599,7 @@ function openEditModal(id) {
 
 async function saveRider() {
     const nombre      = document.getElementById('f-nombre').value.trim();
-    const tipo_sangre = document.getElementById('f-sangre').value.trim().toUpperCase();
+    const tipo_sangre = document.getElementById('f-sangre').value;
     const msg         = document.getElementById('form-msg');
 
     if (!nombre || !tipo_sangre) {
