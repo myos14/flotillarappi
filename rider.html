@@ -3,263 +3,242 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FlotiQR — Emergencia</title>
+<title>Emergencia — RappiPapas</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-    :root {
-        --red: #D7263D;
-        --dark: #0f0f0f;
-        --card: #1a1a1a;
-        --border: #2a2a2a;
-        --text: #f0f0f0;
-        --muted: #888;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-        background: var(--dark);
-        color: var(--text);
-        font-family: 'DM Sans', sans-serif;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+  :root {
+    --red:    #C0202F;
+    --dark:   #111111;
+    --card:   #1c1c1c;
+    --border: #2e2e2e;
+    --text:   #efefef;
+    --muted:  #888;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
 
-    /* ── HEADER ──────────────────────────────── */
-    .header {
-        width: 100%;
-        background: var(--red);
-        padding: 24px 24px 20px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-    .header::before {
-        content: '';
-        position: absolute; top: -40px; right: -40px;
-        width: 120px; height: 120px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.08);
-    }
-    .header-label {
-        font-family: 'Bebas Neue', sans-serif;
-        font-size: 13px; letter-spacing: 4px;
-        color: rgba(255,255,255,0.7); margin-bottom: 4px;
-    }
-    .blood-type {
-        font-family: 'Bebas Neue', sans-serif;
-        font-size: 72px; color: #fff;
-        line-height: 1; letter-spacing: 2px;
-    }
-    .emergency-tag {
-        display: inline-block;
-        background: rgba(0,0,0,0.25); color: #fff;
-        font-size: 11px; font-weight: 600; letter-spacing: 3px;
-        padding: 4px 12px; border-radius: 20px; margin-top: 8px;
-    }
+  /* HEADER */
+  .header {
+    width: 100%; background: var(--red);
+    padding: 28px 24px 22px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; top: -50px; right: -50px;
+    width: 140px; height: 140px; border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .header-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px; letter-spacing: 5px;
+    color: rgba(255,255,255,0.6); margin-bottom: 4px;
+  }
+  .blood-type {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 76px; color: #fff; line-height: 1; letter-spacing: 2px;
+  }
+  .emergency-tag {
+    display: inline-block;
+    background: rgba(0,0,0,0.22); color: rgba(255,255,255,0.9);
+    font-size: 11px; font-weight: 700; letter-spacing: 4px;
+    padding: 5px 14px; border-radius: 20px; margin-top: 10px;
+  }
 
-    /* ── CONTENT ─────────────────────────────── */
-    .content {
-        width: 100%; max-width: 420px;
-        padding: 20px 16px 40px;
-        display: flex; flex-direction: column; gap: 12px;
-    }
+  /* CONTENT */
+  .content {
+    width: 100%; max-width: 440px;
+    padding: 20px 16px 48px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
 
-    .name-card {
-        background: var(--card); border: 1px solid var(--border);
-        border-radius: 14px; padding: 18px 20px; text-align: center;
-    }
-    .name-card .label {
-        font-size: 11px; font-weight: 600; letter-spacing: 2px;
-        color: var(--muted); text-transform: uppercase; margin-bottom: 6px;
-    }
-    .name-card .name { font-size: 22px; font-weight: 700; }
+  .name-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 20px; text-align: center;
+  }
+  .name-card .label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 5px;
+  }
+  .name-card .name { font-size: 20px; font-weight: 700; }
 
-    .info-card {
-        background: var(--card); border: 1px solid var(--border);
-        border-radius: 14px; overflow: hidden;
-    }
-    .info-row {
-        display: flex; align-items: flex-start;
-        gap: 14px; padding: 14px 18px;
-        border-bottom: 1px solid var(--border);
-    }
-    .info-row:last-child { border-bottom: none; }
-    .info-icon {
-        width: 32px; height: 32px; border-radius: 8px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 15px; flex-shrink: 0; margin-top: 1px;
-    }
-    .icon-red    { background: rgba(215,38,61,0.15); }
-    .icon-orange { background: rgba(255,150,50,0.12); }
-    .icon-purple { background: rgba(150,80,255,0.12); }
-    .info-text .label {
-        font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
-        color: var(--muted); text-transform: uppercase; margin-bottom: 3px;
-    }
-    .info-text .value { font-size: 14px; font-weight: 500; line-height: 1.4; }
-    .empty { color: var(--muted); font-style: italic; }
+  .info-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+  }
+  .info-row {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 4px;
+  }
+  .info-row .value { font-size: 14px; font-weight: 500; line-height: 1.5; }
+  .empty { color: var(--muted); font-style: italic; }
 
-    /* ── BUTTONS ─────────────────────────────── */
-    .buttons { display: flex; flex-direction: column; gap: 10px; }
-    .btn {
-        display: flex; align-items: center; justify-content: center; gap: 10px;
-        padding: 16px 20px; border-radius: 14px; border: none;
-        font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
-        cursor: pointer; text-decoration: none;
-        transition: transform 0.15s, opacity 0.15s;
-    }
-    .btn:active { transform: scale(0.97); opacity: 0.9; }
-    .btn-whatsapp { background: #25D366; color: #fff; }
-    .btn-call     { background: #1E6FD9; color: #fff; }
-    .btn-911      { background: var(--red); color: #fff; }
-    .btn-icon     { font-size: 18px; }
+  /* BUTTONS */
+  .buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .btn {
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px 20px; border-radius: 12px; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+    cursor: pointer; text-decoration: none; letter-spacing: 0.2px;
+    transition: opacity 0.15s, transform 0.12s;
+  }
+  .btn:active { transform: scale(0.98); opacity: 0.88; }
+  .btn-whatsapp { background: #1a9e4a; color: #fff; }
+  .btn-call     { background: #1d5fa8; color: #fff; }
+  .btn-911      { background: var(--red); color: #fff; }
 
-    .location-status {
-        font-size: 11px; color: var(--muted);
-        text-align: center; margin-top: -4px; min-height: 16px;
-    }
+  .location-status {
+    font-size: 12px; color: var(--muted);
+    text-align: center; min-height: 18px;
+  }
 
-    /* ── LOADING / ERROR ─────────────────────── */
-    .state-screen {
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        min-height: 100vh; gap: 16px; padding: 40px; text-align: center;
-    }
-    .spinner {
-        width: 40px; height: 40px;
-        border: 3px solid var(--border);
-        border-top-color: var(--red);
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .state-title { font-size: 18px; font-weight: 600; }
-    .state-sub   { font-size: 14px; color: var(--muted); }
+  /* LOADING / ERROR */
+  .state-screen {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 100vh; gap: 16px; padding: 40px; text-align: center;
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border); border-top-color: var(--red);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .state-title { font-size: 18px; font-weight: 600; }
+  .state-sub   { font-size: 14px; color: var(--muted); }
 
-    .fade-in { animation: fadeIn 0.4s ease both; }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
+  .fade-in { animation: fadeIn 0.35s ease both; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="state-screen">
-        <div class="spinner"></div>
-        <p class="state-title">Cargando información</p>
-        <p class="state-sub">Por favor espera...</p>
-    </div>
+  <div class="state-screen">
+    <div class="spinner"></div>
+    <p class="state-title">Cargando información</p>
+    <p class="state-sub">Por favor espera...</p>
+  </div>
 </div>
 
 <script>
-// ─── CONFIG — reemplaza con tus datos de Supabase ──────────────────
-const SUPABASE_URL     = 'https://tabnqjplnxnestyvnkkf.supabase.co';
+const SUPABASE_URL      = 'https://tabnqjplnxnestyvnkkf.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_1fLtXbTcUJG941cd9n2MxA_vhwOymdH';
-// ───────────────────────────────────────────────────────────────────
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function getToken() {
-    return new URLSearchParams(window.location.search).get('token');
+  return new URLSearchParams(window.location.search).get('token');
 }
 
-    function renderError(msg) {
-    document.getElementById('app').innerHTML = `
-        <div class="state-screen">
-        <div style="font-size:48px">⚠️</div>
-        <p class="state-title">QR no válido</p>
-        <p class="state-sub">${msg}</p>
-        </div>`;
-    }
+function renderError(msg) {
+  document.getElementById('app').innerHTML = `
+    <div class="state-screen">
+      <p class="state-title">QR no válido</p>
+      <p class="state-sub">${msg}</p>
+    </div>`;
+}
 
-    function val(v, fallback = '—') {
-    return (v && v.trim())
-        ? v.trim()
-        : `<span class="empty">${fallback}</span>`;
-    }
+function val(v, fallback = '—') {
+  return (v && v.trim()) ? v.trim() : `<span class="empty">${fallback}</span>`;
+}
 
-    async function loadRider() {
-    const token = getToken();
-    if (!token) return renderError('Este QR no tiene un identificador válido.');
+async function loadRider() {
+  const token = getToken();
+  if (!token) return renderError('Este QR no tiene un identificador válido.');
 
-  // Solo se piden los campos que existen en la BD y son necesarios aquí.
-  // telefono_911 NO existe en la tabla — el botón llama al 911 directamente.
-    const { data, error } = await db
-        .from('riders')
-        .select('nombre, tipo_sangre, condiciones, medicamentos, alergias, token_activo, telefono_jefe')
-        .eq('token_qr', token)
-        .single();
+  const { data, error } = await db
+    .from('riders')
+    .select('nombre, tipo_sangre, condiciones, medicamentos, alergias, token_activo, telefono_jefe')
+    .eq('token_qr', token)
+    .single();
 
-    if (error || !data) return renderError('No se encontró información para este QR.');
-    if (!data.token_activo) return renderError('Este QR ha sido desactivado. Contacta a tu jefe de flotilla.');
+  if (error || !data) return renderError('No se encontró información para este QR.');
+  if (!data.token_activo) return renderError('Este QR fue desactivado. Contacta al jefe de flotilla.');
 
-    const r = data;
+  const r = data;
+  document.getElementById('app').innerHTML = `
+    <div class="header fade-in">
+      <div class="header-label">Tipo de sangre</div>
+      <div class="blood-type">${r.tipo_sangre || '?'}</div>
+      <div class="emergency-tag">EMERGENCIA</div>
+    </div>
 
-    document.getElementById('app').innerHTML = `
-        <div class="rider-card fade-in">
-        <div class="rider-top">
-            <div class="rider-blood">${r.tipo_sangre || '?'}</div>
-                <div class="rider-info">
-                <div class="rider-name">${r.nombre}</div>
-                <div class="rider-meta">
-                    ${[r.condiciones, r.alergias].filter(Boolean).join(' · ') || 'Sin condiciones registradas'}
-                </div>
-                </div>
-            </div>
-            <div class="rider-actions">
-                <button class="btn-icon-action" onclick="openQR('${r.id}')">Mostrar QR</button>
-                <button class="btn-icon-action" onclick="openEditModal('${r.id}')">Editar</button>
-                <button class="btn-icon-action" onclick="deleteRider('${r.id}', '${r.nombre.replace(/'/g,"\\'")}')">Eliminar</button>
-            </div>
+    <div class="content fade-in">
+      <div class="name-card">
+        <div class="label">Repartidor</div>
+        <div class="name">${r.nombre || 'Sin nombre'}</div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-row">
+          <div class="label">Condiciones médicas</div>
+          <div class="value">${val(r.condiciones, 'Sin condiciones registradas')}</div>
         </div>
-
-        <div class="buttons">
-            <button class="btn btn-whatsapp" onclick="sendLocation()">
-                Enviar ubicación al jefe
-            </button>
-            <p class="location-status" id="loc-status"></p>
-            <a class="btn btn-call" href="tel:${r.telefono_jefe || ''}">
-                Llamar al jefe de flotilla
-            </a>
-            <a class="btn btn-911" href="tel:911">
-                Llamar al 911
-            </a>
+        <div class="info-row">
+          <div class="label">Medicamentos actuales</div>
+          <div class="value">${val(r.medicamentos, 'Sin medicamentos registrados')}</div>
         </div>
+        <div class="info-row">
+          <div class="label">Alergias</div>
+          <div class="value">${val(r.alergias, 'Sin alergias registradas')}</div>
+        </div>
+      </div>
 
-        </div>`;
+      <div class="buttons">
+        <button class="btn btn-whatsapp" onclick="sendLocation()">
+          Enviar ubicación al jefe
+        </button>
+        <p class="location-status" id="loc-status"></p>
+        <a class="btn btn-call" href="tel:${r.telefono_jefe || ''}">
+          Llamar al jefe de flotilla
+        </a>
+        <a class="btn btn-911" href="tel:911">
+          Llamar al 911
+        </a>
+      </div>
+    </div>`;
 
-    window._jefeTel     = r.telefono_jefe;
-    window._riderNombre = r.nombre;
+  window._jefeTel     = r.telefono_jefe;
+  window._riderNombre = r.nombre;
 }
 
 function sendLocation() {
-    const status = document.getElementById('loc-status');
-    if (!navigator.geolocation) {
-        status.textContent = 'Tu navegador no soporta geolocalización.'; return;
-    }
-    status.textContent = 'Obteniendo ubicación...';
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-        const lat  = pos.coords.latitude.toFixed(6);
-        const lng  = pos.coords.longitude.toFixed(6);
-        const maps = `https://maps.google.com/?q=${lat},${lng}`;
-        const msg  = encodeURIComponent(
-            `EMERGENCIA\n*${window._riderNombre || 'Un repartidor'}* necesita ayuda.\nUbicación actual:\n${maps}`
-        );
-        const tel  = (window._jefeTel || '').replace(/\D/g, '');
-        status.textContent = 'Abriendo WhatsApp...';
-        window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
-        },
-        () => {
-        status.textContent = 'No se pudo obtener ubicación. Permite el acceso al GPS.';
-        },
-        { timeout: 10000 }
-    );
+  const status = document.getElementById('loc-status');
+  if (!navigator.geolocation) {
+    status.textContent = 'Tu navegador no soporta geolocalización.'; return;
+  }
+  status.textContent = 'Obteniendo ubicación...';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat  = pos.coords.latitude.toFixed(6);
+      const lng  = pos.coords.longitude.toFixed(6);
+      const maps = `https://maps.google.com/?q=${lat},${lng}`;
+      const msg  = encodeURIComponent(
+        `EMERGENCIA\n*${window._riderNombre || 'Un repartidor'}* necesita ayuda.\nUbicación:\n${maps}`
+      );
+      const tel = (window._jefeTel || '').replace(/\D/g, '');
+      status.textContent = 'Abriendo WhatsApp...';
+      window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
+    },
+    () => { status.textContent = 'No se pudo obtener ubicación. Permite el acceso al GPS.'; },
+    { timeout: 10000 }
+  );
 }
 
 loadRider();
