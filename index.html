@@ -425,6 +425,14 @@ async function doRegister() {
         msg.className = 'auth-msg error'; msg.textContent = 'La contraseña debe tener al menos 8 caracteres.'; return;
     }
     msg.className = 'auth-msg'; msg.textContent = 'Creando cuenta...';
+
+    const { data: total } = await db.rpc('get_jefe_count');
+    if (total >= 1) {
+        msg.className = 'auth-msg error';
+        msg.textContent = 'Registro no disponible por el momento.';
+        return;
+    }
+
     const { error } = await db.auth.signUp({
         email, password: pass,
         options: { data: { nombre: name, telefono: phone } }
@@ -542,20 +550,20 @@ function renderRiders() {
     }
 
     list.innerHTML = riders.map(r => `
-        <div class="rider-card fade-in">
-        <div class="rider-blood">${r.tipo_sangre || '?'}</div>
-        <div class="rider-info">
-            <div class="rider-name">${r.nombre}</div>
-            <div class="rider-meta">
-            ${[r.condiciones, r.alergias].filter(Boolean).join(' · ') || 'Sin condiciones registradas'}
+    <div class="rider-card fade-in">
+        <div class="rider-top">
+            <div class="rider-blood">${r.tipo_sangre || '?'}</div>
+            <div class="rider-info">
+                <div class="rider-name">${r.nombre}</div>
+                <div class="rider-meta">
+                    ${[r.condiciones, r.alergias].filter(Boolean).join(' · ') || 'Sin condiciones registradas'}
+                </div>
             </div>
         </div>
         <div class="rider-actions">
-            <div class="rider-actions">
-                <button class="btn-icon-action" onclick="openQR('${r.id}')">Mostrar QR</button>
-                <button class="btn-icon-action" onclick="openEditModal('${r.id}')">Editar</button>
-                <button class="btn-icon-action" onclick="deleteRider('${r.id}', '${r.nombre.replace(/'/g,"\\'")}')">Eliminar</button>
-            </div>
+            <button class="btn-icon-action" onclick="openQR('${r.id}')">Mostrar QR</button>
+            <button class="btn-icon-action" onclick="openEditModal('${r.id}')">Editar</button>
+            <button class="btn-icon-action" onclick="deleteRider('${r.id}', '${r.nombre.replace(/'/g,"\\'")}')">Eliminar</button>
         </div>
     </div>`).join('');
 }
