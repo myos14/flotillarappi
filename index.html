@@ -6,7 +6,6 @@
 <title>FlotiQR — Panel de Flotilla</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
     :root {
         --red: #D7263D;
@@ -663,18 +662,14 @@ async function openQR(id) {
 }
 
 function renderQRCanvas(token) {
-    const url  = `${BASE_URL}?token=${token}`;
-    const wrap = document.getElementById('qr-wrap');
-    wrap.innerHTML = '<div id="qr-canvas"></div>';
-    new QRCode(document.getElementById('qr-canvas'), {
-        text: url,
-        width: 240, height: 240,
-        colorDark: '#0f0f0f', colorLight: '#ffffff'
-    });
+    const url    = `${BASE_URL}?token=${token}`;
+    const qrUrl  = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&color=0f0f0f&bgcolor=ffffff&data=${encodeURIComponent(url)}`;
+    const wrap   = document.getElementById('qr-wrap');
+    wrap.innerHTML = `<img id="qr-img" src="${qrUrl}" width="240" height="240" style="border-radius:12px">`;
 }
 
 function downloadQR() {
-    const img  = document.querySelector('#qr-wrap img');
+    const img  = document.getElementById('qr-img');
     const r    = riders.find(x => x.id === qrRiderId);
     const link = document.createElement('a');
     link.download = `QR_${(r?.nombre || 'rider').replace(/\s+/g, '_')}.png`;
