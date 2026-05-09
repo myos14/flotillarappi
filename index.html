@@ -169,9 +169,11 @@
     .rider-actions { display: flex; gap: 8px; flex-shrink: 0; }
     .btn-icon-action {
         background: var(--dark); border: 1px solid var(--border);
-        color: var(--muted); width: 34px; height: 34px;
-        border-radius: 8px; display: flex; align-items: center; justify-content: center;
-        cursor: pointer; font-size: 15px; transition: all 0.2s;
+        color: var(--muted); padding: 6px 12px;
+        border-radius: 8px; cursor: pointer;
+        font-size: 12px; font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        transition: all 0.2s; white-space: nowrap;
     }
     .btn-icon-action:hover { border-color: var(--red); color: var(--text); }
 
@@ -320,7 +322,7 @@
         <button class="btn-add" id="btn-add-rider" onclick="openAddModal()">＋ Agregar rider</button>
         </div>
         <div class="limit-banner" id="limit-banner">
-        🏁 Límite alcanzado — máximo 50 riders por flotilla.
+        Límite alcanzado — máximo 50 riders por flotilla.
         </div>
         <div class="riders-grid" id="riders-list"></div>
     </div>
@@ -372,8 +374,8 @@
         <div class="modal-sub" id="qr-modal-sub">Descarga e imprime o muestra desde el celular</div>
         <div class="qr-wrap" id="qr-wrap"></div>
         <div style="text-align:center;margin-top:16px">
-        <button class="btn-download" onclick="downloadQR()">⬇️ Descargar QR</button>
-        <button class="btn-regen" onclick="regenQR()">🔄 Regenerar</button>
+        <button class="btn-download" onclick="downloadQR()">Descargar QR</button>
+        <button class="btn-regen" onclick="regenQR()">Generar nuevo QR</button>
         </div>
         <p class="form-msg" id="qr-msg"></p>
         <div class="modal-actions" style="margin-top:16px">
@@ -562,9 +564,11 @@ function renderRiders() {
             </div>
         </div>
         <div class="rider-actions">
-            <button class="btn-icon-action" title="Ver QR" onclick="openQR('${r.id}')">📱</button>
-            <button class="btn-icon-action" title="Editar"  onclick="openEditModal('${r.id}')">✏️</button>
-            <button class="btn-icon-action" title="Eliminar" onclick="deleteRider('${r.id}', '${r.nombre.replace(/'/g,"\\'")}')">🗑️</button>
+            <div class="rider-actions">
+                <button class="btn-icon-action" onclick="openQR('${r.id}')">Mostrar QR</button>
+                <button class="btn-icon-action" onclick="openEditModal('${r.id}')">Editar</button>
+                <button class="btn-icon-action" onclick="deleteRider('${r.id}', '${r.nombre.replace(/'/g,"\\'")}')">Eliminar</button>
+            </div>
         </div>
     </div>`).join('');
 }
