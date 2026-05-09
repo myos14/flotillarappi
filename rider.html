@@ -201,37 +201,20 @@ function getToken() {
     const r = data;
 
     document.getElementById('app').innerHTML = `
-        <div class="header fade-in">
-        <div class="header-label">Tipo de sangre</div>
-        <div class="blood-type">${r.tipo_sangre || '?'}</div>
-        <div class="emergency-tag">EMERGENCIA</div>
-        </div>
-
-        <div class="content fade-in">
-
-        <div class="name-card">
-            <div class="label">Repartidor</div>
-            <div class="name">${r.nombre || 'Sin nombre'}</div>
-        </div>
-
-        <div class="info-card">
-            <div class="info-row">
-            <div class="info-text">
-                <div class="label">Condiciones médicas</div>
-                <div class="value">${val(r.condiciones, 'Sin condiciones registradas')}</div>
+        <div class="rider-card fade-in">
+        <div class="rider-top">
+            <div class="rider-blood">${r.tipo_sangre || '?'}</div>
+                <div class="rider-info">
+                <div class="rider-name">${r.nombre}</div>
+                <div class="rider-meta">
+                    ${[r.condiciones, r.alergias].filter(Boolean).join(' · ') || 'Sin condiciones registradas'}
+                </div>
+                </div>
             </div>
-            </div>
-            <div class="info-row">
-            <div class="info-text">
-                <div class="label">Medicamentos actuales</div>
-                <div class="value">${val(r.medicamentos, 'Sin medicamentos registrados')}</div>
-            </div>
-            </div>
-            <div class="info-row">
-            <div class="info-text">
-                <div class="label">Alergias</div>
-                <div class="value">${val(r.alergias, 'Sin alergias registradas')}</div>
-            </div>
+            <div class="rider-actions">
+                <button class="btn-icon-action" onclick="openQR('${r.id}')">Mostrar QR</button>
+                <button class="btn-icon-action" onclick="openEditModal('${r.id}')">Editar</button>
+                <button class="btn-icon-action" onclick="deleteRider('${r.id}', '${r.nombre.replace(/'/g,"\\'")}')">Eliminar</button>
             </div>
         </div>
 
