@@ -6,7 +6,7 @@
 <title>FlotiQR — Panel de Flotilla</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
     :root {
         --red: #D7263D;
@@ -665,36 +665,37 @@ async function openQR(id) {
 function renderQRCanvas(token) {
     const url  = `${BASE_URL}?token=${token}`;
     const wrap = document.getElementById('qr-wrap');
-    wrap.innerHTML = '<canvas id="qr-canvas"></canvas>';
-    QRCode.toCanvas(document.getElementById('qr-canvas'), url, {
-        width: 240, margin: 2,
-        color: { dark: '#0f0f0f', light: '#ffffff' }
+    wrap.innerHTML = '<div id="qr-canvas"></div>';
+    new QRCode(document.getElementById('qr-canvas'), {
+        text: url,
+        width: 240, height: 240,
+        colorDark: '#0f0f0f', colorLight: '#ffffff'
     });
 }
 
 function downloadQR() {
-    const canvas = document.getElementById('qr-canvas');
-    const r      = riders.find(x => x.id === qrRiderId);
-    const link   = document.createElement('a');
+    const img  = document.querySelector('#qr-wrap img');
+    const r    = riders.find(x => x.id === qrRiderId);
+    const link = document.createElement('a');
     link.download = `QR_${(r?.nombre || 'rider').replace(/\s+/g, '_')}.png`;
-    link.href     = canvas.toDataURL();
+    link.href = img.src;
     link.click();
 }
 
 async function regenQR() {
-    if (!confirm('¿Regenerar el QR? El QR anterior dejará de funcionar.')) return;
+    if (!confirm('Desea generar un nuevo QR? El QR anterior dejará de funcionar.')) return;
     const msg      = document.getElementById('qr-msg');
-    msg.textContent = 'Regenerando...';
+    msg.textContent = 'Generando...';
     const newToken  = crypto.randomUUID();
     const { error } = await db.from('riders')
         .update({ token_qr: newToken })
         .eq('id', qrRiderId);
-    if (error) { msg.textContent = 'Error al regenerar.'; return; }
+    if (error) { msg.textContent = 'Error al generar el nuevo QR.'; return; }
     await loadRiders();
     const updated = riders.find(x => x.id === qrRiderId);
     renderQRCanvas(updated.token_qr);
     msg.className  = 'form-msg success';
-    msg.textContent = '✅ QR regenerado. El anterior ya no funciona.';
+    msg.textContent = 'Se genero un nuevo QR.';
 }
 
 function closeModal(id) {
