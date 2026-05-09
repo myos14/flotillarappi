@@ -204,7 +204,7 @@ function getToken() {
         <div class="header fade-in">
         <div class="header-label">Tipo de sangre</div>
         <div class="blood-type">${r.tipo_sangre || '?'}</div>
-        <div class="emergency-tag">🚨 EMERGENCIA</div>
+        <div class="emergency-tag">EMERGENCIA</div>
         </div>
 
         <div class="content fade-in">
@@ -216,21 +216,18 @@ function getToken() {
 
         <div class="info-card">
             <div class="info-row">
-            <div class="info-icon icon-red">⚕️</div>
             <div class="info-text">
                 <div class="label">Condiciones médicas</div>
                 <div class="value">${val(r.condiciones, 'Sin condiciones registradas')}</div>
             </div>
             </div>
             <div class="info-row">
-            <div class="info-icon icon-orange">💊</div>
             <div class="info-text">
                 <div class="label">Medicamentos actuales</div>
                 <div class="value">${val(r.medicamentos, 'Sin medicamentos registrados')}</div>
             </div>
             </div>
             <div class="info-row">
-            <div class="info-icon icon-purple">🚫</div>
             <div class="info-text">
                 <div class="label">Alergias</div>
                 <div class="value">${val(r.alergias, 'Sin alergias registradas')}</div>
@@ -240,14 +237,14 @@ function getToken() {
 
         <div class="buttons">
             <button class="btn btn-whatsapp" onclick="sendLocation()">
-            <span class="btn-icon">📍</span> Enviar ubicación al jefe
+                Enviar ubicación al jefe
             </button>
             <p class="location-status" id="loc-status"></p>
             <a class="btn btn-call" href="tel:${r.telefono_jefe || ''}">
-            <span class="btn-icon">📞</span> Llamar al jefe de flotilla
+                Llamar al jefe de flotilla
             </a>
             <a class="btn btn-911" href="tel:911">
-            <span class="btn-icon">🚨</span> Llamar al 911
+                Llamar al 911
             </a>
         </div>
 
@@ -269,14 +266,14 @@ function sendLocation() {
         const lng  = pos.coords.longitude.toFixed(6);
         const maps = `https://maps.google.com/?q=${lat},${lng}`;
         const msg  = encodeURIComponent(
-            `🚨 EMERGENCIA\n*${window._riderNombre || 'Un repartidor'}* necesita ayuda.\n📍 Ubicación actual:\n${maps}`
+            `EMERGENCIA\n*${window._riderNombre || 'Un repartidor'}* necesita ayuda.\nUbicación actual:\n${maps}`
         );
         const tel  = (window._jefeTel || '').replace(/\D/g, '');
-        status.textContent = '✅ Abriendo WhatsApp...';
+        status.textContent = 'Abriendo WhatsApp...';
         window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
         },
         () => {
-        status.textContent = '⚠️ No se pudo obtener ubicación. Permite el acceso al GPS.';
+        status.textContent = 'No se pudo obtener ubicación. Permite el acceso al GPS.';
         },
         { timeout: 10000 }
     );
