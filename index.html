@@ -563,7 +563,12 @@ function renderRiders() {
         <div class="rider-actions">
             <button class="btn-icon-action" onclick="openQR('${r.id}')">Mostrar QR</button>
             <button class="btn-icon-action" onclick="openEditModal('${r.id}')">Editar</button>
-            <button class="btn-icon-action" onclick="deleteRider('${r.id}', '${r.nombre.replace(/'/g,"\\'")}')">Eliminar</button>
+            <button class="btn-icon-action" 
+                data-id="${r.id}" 
+                data-nombre="${r.nombre.replace(/"/g, '&quot;')}" 
+                onclick="deleteRider(this)">
+                    Eliminar
+            </button>
         </div>
     </div>`).join('');
 }
@@ -643,7 +648,9 @@ async function saveRider() {
     }
 }
 
-async function deleteRider(id, nombre) {
+async function deleteRider(btn) {
+    const id     = btn.dataset.id;
+    const nombre = btn.dataset.nombre;
     if (!confirm(`¿Eliminar a ${nombre}? Esta acción no se puede deshacer.`)) return;
     await db.from('riders').delete().eq('id', id);
     loadRiders();
