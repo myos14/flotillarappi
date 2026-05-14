@@ -159,19 +159,19 @@ function val(v, fallback = '—') {
 }
 
 async function loadRider() {
-  const token = getToken();
-  if (!token) return renderError('Este QR no tiene un identificador válido.');
+    const token = getToken();
+    if (!token) return renderError('Este QR no tiene un identificador válido.');
 
-  const { data, error } = await db
-    .from('riders')
-    .select('nombre, tipo_sangre, condiciones, medicamentos, alergias, token_activo, telefono_jefe')
-    .eq('token_qr', token)
-    .single();
+    const { data, error } = await db
+        .rpc('get_rider_by_token', { p_token: token });
+
+    if (error || !data || data.length === 0) return renderError('No se encontró información para este QR.');
+    if (!data[0].token_activo) return renderError('Este QR fue desactivado. Contacta al jefe de flotilla.');
 
   if (error || !data) return renderError('No se encontró información para este QR.');
   if (!data.token_activo) return renderError('Este QR fue desactivado. Contacta al jefe de flotilla.');
 
-  const r = data;
+  const r = data[0];
   document.getElementById('app').innerHTML = `
     <div class="header fade-in">
       <div class="header-label">Tipo de sangre</div>
