@@ -432,13 +432,6 @@ async function doRegister() {
     }
     msg.className = 'auth-msg'; msg.textContent = 'Creando cuenta...';
 
-    const { data: total } = await db.rpc('get_jefe_count');
-    if (total >= 1) {
-        msg.className = 'auth-msg error';
-        msg.textContent = 'Registro no disponible por el momento.';
-        return;
-    }
-
     const { error } = await db.auth.signUp({
         email, password: pass,
         options: { data: { nombre: name, telefono: phone } }
