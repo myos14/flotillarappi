@@ -135,9 +135,6 @@
 const SUPABASE_URL      = 'https://tabnqjplnxnestyvnkkf.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_1fLtXbTcUJG941cd9n2MxA_vhwOymdH';
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 function getToken() {
   return new URLSearchParams(window.location.search).get('token');
 }
@@ -158,58 +155,69 @@ async function loadRider() {
   const token = getToken();
   if (!token) return renderError('Este QR no tiene un identificador válido.');
 
-  const { data, error } = await db
-    .rpc('get_rider_by_token', { p_token: token });
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_rider_by_token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({ p_token: token })
+    });
 
-  if (error || !data || data.length === 0) return renderError('No se encontró información para este QR.');
-  if (!data[0].token_activo) return renderError('Este QR fue desactivado. Contacta al jefe de flotilla.');
+    const data = await response.json();
 
-  const r = data[0];
+    if (!response.ok || !data || data.length === 0) return renderError('No se encontró información para este QR.');
+    if (!data[0].token_activo) return renderError('Este QR fue desactivado. Contacta al jefe de flotilla.');
 
-  document.getElementById('app').innerHTML = `
-    <div class="header fade-in">
-      <div class="header-label">Tipo de sangre</div>
-      <div class="blood-type">${r.tipo_sangre || '?'}</div>
-      <div class="emergency-tag">EMERGENCIA</div>
-    </div>
+    const r = data[0];
 
-    <div class="content fade-in">
-      <div class="name-card">
-        <div class="label">Repartidor</div>
-        <div class="name">${r.nombre || 'Sin nombre'}</div>
+    document.getElementById('app').innerHTML = `
+      <div class="header fade-in">
+        <div class="header-label">Tipo de sangre</div>
+        <div class="blood-type">${r.tipo_sangre || '?'}</div>
+        <div class="emergency-tag">EMERGENCIA</div>
       </div>
-
-      <div class="info-card">
-        <div class="info-row">
-          <div class="label">Condiciones médicas</div>
-          <div class="value">${val(r.condiciones, 'Sin condiciones registradas')}</div>
+      <div class="content fade-in">
+        <div class="name-card">
+          <div class="label">Repartidor</div>
+          <div class="name">${r.nombre || 'Sin nombre'}</div>
         </div>
-        <div class="info-row">
-          <div class="label">Medicamentos actuales</div>
-          <div class="value">${val(r.medicamentos, 'Sin medicamentos registrados')}</div>
+        <div class="info-card">
+          <div class="info-row">
+            <div class="label">Condiciones médicas</div>
+            <div class="value">${val(r.condiciones, 'Sin condiciones registradas')}</div>
+          </div>
+          <div class="info-row">
+            <div class="label">Medicamentos actuales</div>
+            <div class="value">${val(r.medicamentos, 'Sin medicamentos registrados')}</div>
+          </div>
+          <div class="info-row">
+            <div class="label">Alergias</div>
+            <div class="value">${val(r.alergias, 'Sin alergias registradas')}</div>
+          </div>
         </div>
-        <div class="info-row">
-          <div class="label">Alergias</div>
-          <div class="value">${val(r.alergias, 'Sin alergias registradas')}</div>
+        <div class="buttons">
+          <button class="btn btn-whatsapp" onclick="sendLocation()">
+            Enviar ubicación al jefe
+          </button>
+          <p class="location-status" id="loc-status"></p>
+          <a class="btn btn-call" href="tel:${r.telefono_jefe || ''}">
+            Llamar al jefe de flotilla
+          </a>
+          <a class="btn btn-911" href="tel:911">
+            Llamar al 911
+          </a>
         </div>
-      </div>
+      </div>`;
 
-      <div class="buttons">
-        <button class="btn btn-whatsapp" onclick="sendLocation()">
-          Enviar ubicación al jefe
-        </button>
-        <p class="location-status" id="loc-status"></p>
-        <a class="btn btn-call" href="tel:${r.telefono_jefe || ''}">
-          Llamar al jefe de flotilla
-        </a>
-        <a class="btn btn-911" href="tel:911">
-          Llamar al 911
-        </a>
-      </div>
-    </div>`;
+    window._jefeTel     = r.telefono_jefe;
+    window._riderNombre = r.nombre;
 
-  window._jefeTel     = r.telefono_jefe;
-  window._riderNombre = r.nombre;
+  } catch (e) {
+    renderError('Error de conexión. Verifica tu internet e intenta de nuevo.');
+  }
 }
 
 function sendLocation() {
