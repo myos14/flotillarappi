@@ -634,7 +634,10 @@ async function saveRider() {
     if (editingId) {
         ({ error } = await db.from('riders').update(payload).eq('id', editingId));
     } else {
-        payload.token_qr    = crypto.randomUUID();
+        payload.token_qr = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
         payload.token_activo = true;
         ({ error } = await db.from('riders').insert(payload));
     }
