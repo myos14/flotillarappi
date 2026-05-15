@@ -330,10 +330,10 @@
                 <div class="section-title">HB BIKER</div>
                 <div class="rider-count" id="rider-count"></div>
             </div>
-            <button class="btn-add" id="btn-add-rider" onclick="openAddModal()">＋ Agregar rider</button>
+            <button class="btn-add" id="btn-add-rider" onclick="openAddModal()">＋ Agregar biker</button>
         </div>
         <div class="limit-banner" id="limit-banner">
-            Límite alcanzado — máximo 50 riders por flotilla.
+            Límite alcanzado — máximo 50 bikers por flotilla.
         </div>
         <div class="riders-grid" id="riders-list"></div>
     </div>
@@ -396,7 +396,7 @@
                 Compartir QR por WhatsApp
             </button>
             <button class="btn-regen" id="btn-regen" onclick="regenQR()">
-                🔄 Generar nuevo QR
+                Generar nuevo QR
             </button>
         </div>
 
@@ -871,7 +871,7 @@ async function regenQR() {
 
 function resetRegenBtn(btn, msg) {
     regenPendingConfirm   = false;
-    btn.textContent       = '🔄 Generar nuevo QR';
+    btn.textContent       = 'Generar nuevo QR';
     btn.style.borderColor = '';
     btn.style.color       = '';
     if (msg && msg.textContent === 'El QR anterior dejará de funcionar.') {
