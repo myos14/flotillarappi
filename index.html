@@ -812,13 +812,13 @@ async function regenQR() {
 
     renderQRCanvas(updated.token_qr);
     msg.className   = 'form-msg success';
-    msg.textContent = '✓ Nuevo QR generado correctamente.';
+    msg.textContent = 'Nuevo QR generado correctamente.';
     btn.disabled    = false;
 }
 
 function resetRegenBtn(btn, msg) {
     regenPendingConfirm   = false;
-    btn.textContent       = '🔄 Generar nuevo QR';
+    btn.textContent       = 'Generar nuevo QR';
     btn.style.borderColor = '';
     btn.style.color       = '';
     if (msg && msg.textContent === 'El QR anterior dejará de funcionar.') {
