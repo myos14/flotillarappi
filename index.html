@@ -6,6 +6,7 @@
 <title>FlotiQR — Panel de Flotilla</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
     :root {
         --red: #D7263D;
@@ -688,10 +689,15 @@ async function openQR(id) {
 }
 
 function renderQRCanvas(token) {
-    const url   = `${BASE_URL}?token=${token}`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&color=0f0f0f&bgcolor=ffffff&data=${encodeURIComponent(url)}`;
-    document.getElementById('qr-wrap').innerHTML =
-        `<img id="qr-img" src="${qrUrl}" width="240" height="240" style="border-radius:12px">`;
+    const url  = `${BASE_URL}?token=${token}`;
+    const wrap = document.getElementById('qr-wrap');
+    // Generamos el QR localmente en un <canvas> — sin fetch externo, sin CORS
+    wrap.innerHTML = '<canvas id="qr-canvas" style="border-radius:12px;display:block;margin:0 auto"></canvas>';
+    QRCode.toCanvas(document.getElementById('qr-canvas'), url, {
+        width: 240,
+        margin: 2,
+        color: { dark: '#0f0f0f', light: '#ffffff' }
+    }, err => { if (err) console.error('QR render error:', err); });
 }
 
 // ── COMPARTIR QR POR WHATSAPP ─────────────────────────────
@@ -701,55 +707,58 @@ async function shareQR() {
     if (!r) return;
 
     const qrPageUrl = `${BASE_URL}?token=${r.token_qr}`;
-    // Número del jefe: limpiamos todo excepto dígitos, agregamos lada MX si es necesario
     let tel = (r.telefono_jefe || '').replace(/\D/g, '');
-    if (tel.length === 10) tel = '52' + tel;   // agrega lada México
+    if (tel.length === 10) tel = '52' + tel;
 
-    const waText = encodeURIComponent(
-        `🏍️ *QR de emergencia — ${r.nombre}*\n\n` +
-        `Escanea este código para ver su información médica en caso de accidente:\n` +
-        `${qrPageUrl}`
-    );
+    const canvas = document.getElementById('qr-canvas');
 
-    // 1) Intentar Web Share API (comparte la imagen real desde el carrete)
-    const imgEl = document.getElementById('qr-img');
-    if (imgEl && navigator.share) {
+    // 1) Web Share API con imagen (iOS y Android)
+    //    El canvas es local → toBlob() funciona sin CORS en ambas plataformas
+    if (canvas && navigator.share) {
         try {
             msg.className = 'form-msg'; msg.textContent = 'Preparando imagen...';
-            const response = await fetch(imgEl.src);
-            const blob     = await response.blob();
-            const file     = new File([blob], `QR_${r.nombre.replace(/\s+/g,'_')}.png`, { type: 'image/png' });
 
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    files: [file],
-                    title: `QR de emergencia — ${r.nombre}`,
-                    text: `QR médico de ${r.nombre}\n${qrPageUrl}`
-                });
+            const blob = await new Promise((res, rej) =>
+                canvas.toBlob(b => b ? res(b) : rej(new Error('toBlob falló')), 'image/png')
+            );
+            const file = new File([blob], `QR_${r.nombre.replace(/\s+/g,'_')}.png`, { type: 'image/png' });
+
+            const shareData = {
+                files: [file],
+                title: `QR de emergencia — ${r.nombre}`,
+                text:  `🏍️ QR médico de ${r.nombre}\n${qrPageUrl}`
+            };
+
+            if (navigator.canShare && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
                 msg.className = 'form-msg success'; msg.textContent = '¡QR compartido!';
                 return;
             }
+
+            // Si el dispositivo no acepta archivos, compartir solo el link
+            await navigator.share({ title: `QR — ${r.nombre}`, url: qrPageUrl });
+            msg.className = 'form-msg success'; msg.textContent = '¡Link compartido!';
+            return;
+
         } catch (e) {
-            // usuario canceló o el navegador no soporta — caemos al fallback
             if (e.name === 'AbortError') {
                 msg.className = 'form-msg'; msg.textContent = '';
                 return;
             }
+            // Otro error → caer al fallback de WhatsApp
+            console.warn('Share API error:', e);
         }
     }
 
-    // 2) Fallback: abrir WhatsApp con el link del QR al número del jefe
+    // 2) Fallback: WhatsApp directo al número del jefe
     msg.className = 'form-msg'; msg.textContent = 'Abriendo WhatsApp...';
-    const waUrl = tel
-        ? `https://wa.me/${tel}?text=${waText}`
-        : `https://wa.me/?text=${waText}`;
-
-    const link = document.createElement('a');
+    const waText = encodeURIComponent(
+        `🏍️ *QR de emergencia — ${r.nombre}*\n\nEscanea este código para ver su información médica:\n${qrPageUrl}`
+    );
+    const waUrl  = tel ? `https://wa.me/${tel}?text=${waText}` : `https://wa.me/?text=${waText}`;
+    const link   = document.createElement('a');
     link.href = waUrl; link.target = '_blank'; link.rel = 'noopener';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
     setTimeout(() => { msg.textContent = ''; }, 2000);
 }
 
@@ -766,7 +775,7 @@ async function regenQR() {
     // — Primer toque: pedir confirmación inline —
     if (!regenPendingConfirm) {
         regenPendingConfirm    = true;
-        btn.textContent        = '¿Confirmar? Toca de nuevo';
+        btn.textContent        = '⚠️ ¿Confirmar? Toca de nuevo';
         btn.style.borderColor  = '#D7263D';
         btn.style.color        = '#D7263D';
         msg.className          = 'form-msg';
@@ -812,7 +821,7 @@ async function regenQR() {
 
     renderQRCanvas(updated.token_qr);
     msg.className   = 'form-msg success';
-    msg.textContent = 'Nuevo QR generado correctamente.';
+    msg.textContent = '✓ Nuevo QR generado correctamente.';
     btn.disabled    = false;
 }
 
