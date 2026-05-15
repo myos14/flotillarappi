@@ -6,7 +6,7 @@
 <title>FlotiQR — Panel de Flotilla</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
     :root {
         --red: #D7263D;
@@ -711,13 +711,24 @@ async function openQR(id) {
 function renderQRCanvas(token) {
     const url  = `${BASE_URL}?token=${token}`;
     const wrap = document.getElementById('qr-wrap');
-    // Generamos el QR localmente en un <canvas> — sin fetch externo, sin CORS
-    wrap.innerHTML = '<canvas id="qr-canvas" style="border-radius:12px;display:block;margin:0 auto"></canvas>';
-    QRCode.toCanvas(document.getElementById('qr-canvas'), url, {
-        width: 240,
-        margin: 2,
-        color: { dark: '#0f0f0f', light: '#ffffff' }
-    }, err => { if (err) console.error('QR render error:', err); });
+    wrap.innerHTML = ''; // limpiar QR anterior
+
+    new QRCode(wrap, {
+        text:         url,
+        width:        240,
+        height:       240,
+        colorDark:    '#0f0f0f',
+        colorLight:   '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // qrcodejs genera canvas + img; ocultamos el img duplicado y estilizamos el canvas
+    setTimeout(() => {
+        const canvas = wrap.querySelector('canvas');
+        const img    = wrap.querySelector('img');
+        if (canvas) canvas.style.cssText = 'border-radius:12px;display:block;margin:0 auto';
+        if (img)    img.style.display    = 'none';
+    }, 80);
 }
 
 // ── COMPARTIR QR POR WHATSAPP ─────────────────────────────
@@ -730,7 +741,7 @@ async function shareQR() {
     let tel = (r.telefono_jefe || '').replace(/\D/g, '');
     if (tel.length === 10) tel = '52' + tel;
 
-    const canvas = document.getElementById('qr-canvas');
+    const canvas = document.querySelector('#qr-wrap canvas');
 
     // 1) Web Share API con imagen (iOS y Android)
     //    El canvas es local → toBlob() funciona sin CORS en ambas plataformas
