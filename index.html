@@ -519,7 +519,30 @@ async function doLogout() {
 }
 
 // ── SESSION ────────────────────────────────────────────────
-db.auth.onAuthStateChange(async (event, session) => {
+// showApp / hideApp para no repetir lógica
+function showApp(user) {
+    currentUser = user;
+    document.getElementById('auth-section').style.display     = 'none';
+    document.getElementById('recovery-section').style.display = 'none';
+    document.getElementById('app-section').classList.remove('hidden');
+    document.getElementById('user-email').textContent = user.email;
+    loadRiders();
+}
+function showAuth() {
+    document.getElementById('auth-section').style.display     = '';
+    document.getElementById('recovery-section').style.display = 'none';
+    document.getElementById('app-section').classList.add('hidden');
+}
+
+// 1) Leer sesión guardada al arrancar (fix Android: INITIAL_SESSION
+//    puede disparar antes de que onAuthStateChange esté listo)
+(async () => {
+    const { data: { session } } = await db.auth.getSession();
+    if (session?.user && !currentUser) showApp(session.user);
+})();
+
+// 2) Escuchar cambios de sesión (login, logout, recovery, token refresh)
+db.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
         document.getElementById('auth-section').style.display     = 'none';
         document.getElementById('recovery-section').style.display = 'flex';
@@ -527,16 +550,13 @@ db.auth.onAuthStateChange(async (event, session) => {
         return;
     }
     if (session?.user) {
-        currentUser = session.user;
-        document.getElementById('auth-section').style.display     = 'none';
-        document.getElementById('recovery-section').style.display = 'none';
-        document.getElementById('app-section').classList.remove('hidden');
-        document.getElementById('user-email').textContent = currentUser.email;
-        loadRiders();
+        // Evitar doble llamada a loadRiders si getSession ya lo hizo
+        const alreadyLoaded = currentUser?.id === session.user.id;
+        showApp(session.user);
+        if (alreadyLoaded) return;   // riders ya cargados, no repetir
     } else {
-        document.getElementById('auth-section').style.display     = '';
-        document.getElementById('recovery-section').style.display = 'none';
-        document.getElementById('app-section').classList.add('hidden');
+        currentUser = null;
+        showAuth();
     }
 });
 
