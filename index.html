@@ -199,28 +199,36 @@
         font-size: 12px; color: var(--muted);
         margin-top: 10px; text-align: center; min-height: 18px;
     }
-    .form-msg.error { color: #ff6b6b; }
+    .form-msg.error   { color: #ff6b6b; }
+    .form-msg.success { color: var(--green); }  /* ← FIX: faltaba esta regla */
 
     /* ── QR MODAL ────────────────────────────── */
     .qr-wrap { text-align: center; padding: 10px 0; }
     .qr-wrap canvas { border-radius: 12px; }
-    .btn-download {
-        display: inline-flex; align-items: center; gap: 8px;
-        background: var(--red); color: #fff; border: none;
-        padding: 12px 24px; border-radius: 12px;
-        font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
-        cursor: pointer; margin-bottom: 8px; transition: opacity 0.2s;
+
+    /* botones del modal QR apilados y full-width */
+    .qr-btn-group {
+        display: flex; flex-direction: column; gap: 10px;
+        margin-top: 16px;
     }
-    .btn-download:hover { opacity: 0.88; }
+    .btn-share {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        background: #1a9e4a; color: #fff; border: none;
+        padding: 13px 24px; border-radius: 12px;
+        font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+        cursor: pointer; width: 100%; transition: opacity 0.2s;
+    }
+    .btn-share:hover { opacity: 0.88; }
     .btn-regen {
-        display: inline-flex; align-items: center; gap: 8px;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
         background: transparent; color: var(--muted);
         border: 1px solid var(--border);
-        padding: 10px 20px; border-radius: 12px;
+        padding: 11px 20px; border-radius: 12px;
         font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
-        cursor: pointer; margin-left: 8px; transition: all 0.2s;
+        cursor: pointer; width: 100%; transition: all 0.2s;
     }
     .btn-regen:hover { border-color: var(--muted); color: var(--text); }
+    .btn-regen:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── EMPTY STATE ─────────────────────────── */
     .empty-state {
@@ -260,7 +268,8 @@
             <p class="forgot-link" onclick="doResetPassword()">¿Olvidaste tu contraseña?</p>
         </div>
 
-        <!-- REGISTER --><div id="tab-register" class="hidden">
+        <!-- REGISTER -->
+        <div id="tab-register" class="hidden">
             <label>Nombre completo</label>
             <input type="text" id="reg-name"
                 oninput="this.value=this.value.replace(/\b\w/g,c=>c.toUpperCase())">
@@ -274,11 +283,10 @@
             <button class="btn-primary" onclick="doRegister()">Crear cuenta</button>
             <p class="auth-msg" id="reg-msg"></p>
         </div>
-        
     </div>
 </div>
 
-<!-- ── RECOVERY (nueva contraseña tras link del correo) ── -->
+<!-- ── RECOVERY ──────────────────────────────────────────── -->
 <div id="recovery-section" class="auth-wrap">
     <div class="auth-box">
         <div class="auth-logo">HB BIKER</div>
@@ -297,21 +305,21 @@
     <div class="topbar">
         <div class="topbar-logo">HB BIKER</div>
         <div class="topbar-right">
-        <span class="topbar-user" id="user-email"></span>
-        <button class="btn-logout" onclick="doLogout()">Salir</button>
+            <span class="topbar-user" id="user-email"></span>
+            <button class="btn-logout" onclick="doLogout()">Salir</button>
         </div>
     </div>
 
     <div class="main">
         <div class="section-header">
-        <div>
-            <div class="section-title">Mi Flotilla</div>
-            <div class="rider-count" id="rider-count"></div>
-        </div>
-        <button class="btn-add" id="btn-add-rider" onclick="openAddModal()">＋ Agregar rider</button>
+            <div>
+                <div class="section-title">Mi Flotilla</div>
+                <div class="rider-count" id="rider-count"></div>
+            </div>
+            <button class="btn-add" id="btn-add-rider" onclick="openAddModal()">＋ Agregar rider</button>
         </div>
         <div class="limit-banner" id="limit-banner">
-        Límite alcanzado — máximo 50 riders por flotilla.
+            Límite alcanzado — máximo 50 riders por flotilla.
         </div>
         <div class="riders-grid" id="riders-list"></div>
     </div>
@@ -361,28 +369,38 @@
 <div class="modal-overlay hidden" id="qr-modal">
     <div class="modal fade-in" style="max-width:340px">
         <div class="modal-title">QR del Rider</div>
-        <div class="modal-sub" id="qr-modal-sub">Descarga e imprime o muestra desde el celular</div>
+        <div class="modal-sub" id="qr-modal-sub">Comparte o imprime el QR de emergencia</div>
         <div class="qr-wrap" id="qr-wrap"></div>
-        <div style="text-align:center;margin-top:16px">
-        <button class="btn-download" onclick="downloadQR()">Descargar QR</button>
-        <button class="btn-regen" onclick="regenQR()">Generar nuevo QR</button>
+
+        <!-- Botones apilados, full-width -->
+        <div class="qr-btn-group">
+            <button class="btn-share" onclick="shareQR()">
+                <!-- WhatsApp icon SVG inline -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                Compartir QR por WhatsApp
+            </button>
+            <button class="btn-regen" id="btn-regen" onclick="regenQR()">
+                🔄 Generar nuevo QR
+            </button>
         </div>
+
         <p class="form-msg" id="qr-msg"></p>
+
         <div class="modal-actions" style="margin-top:16px">
-        <button class="btn-cancel" style="flex:1" onclick="closeModal('qr-modal')">Cerrar</button>
+            <button class="btn-cancel" style="flex:1" onclick="closeModal('qr-modal')">Cerrar</button>
         </div>
     </div>
 </div>
 
 <script>
-// ─── CONFIG ──────────────────
-const SUPABASE_URL     = 'https://tabnqjplnxnestyvnkkf.supabase.co';
+// ─── CONFIG ──────────────────────────────────────────────
+const SUPABASE_URL      = 'https://tabnqjplnxnestyvnkkf.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_1fLtXbTcUJG941cd9n2MxA_vhwOymdH';
-// URL pública donde vivirá rider.html (GitHub Pages)
-const BASE_URL = 'https://myos14.github.io/flotillarappi/rider.html';
-// ───────────────────────────────────────────────────────────────────
-
-const RIDER_LIMIT = 50;
+const BASE_URL          = 'https://myos14.github.io/flotillarappi/rider.html';
+const RIDER_LIMIT       = 50;
+// ─────────────────────────────────────────────────────────
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -392,7 +410,18 @@ let riders      = [];
 let editingId   = null;
 let qrRiderId   = null;
 
-// ── AUTH TABS ────────────────────────────────────────────────────────
+// Generador de UUID compatible con todos los navegadores
+function genUUID() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+}
+
+// ── AUTH TABS ─────────────────────────────────────────────
 function switchTab(tab) {
     document.querySelectorAll('.auth-tab').forEach((t, i) =>
         t.classList.toggle('active', (i === 0) === (tab === 'login'))
@@ -401,7 +430,7 @@ function switchTab(tab) {
     document.getElementById('tab-register').classList.toggle('hidden', tab !== 'register');
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────────────
+// ── LOGIN ──────────────────────────────────────────────────
 async function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const pass  = document.getElementById('login-pass').value;
@@ -414,7 +443,7 @@ async function doLogin() {
     }
 }
 
-// ── REGISTER ──────────────────────────────────────────────────────────
+// ── REGISTER ───────────────────────────────────────────────
 async function doRegister() {
     const name  = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
@@ -431,7 +460,6 @@ async function doRegister() {
         msg.className = 'auth-msg error'; msg.textContent = 'La contraseña debe tener al menos 8 caracteres.'; return;
     }
     msg.className = 'auth-msg'; msg.textContent = 'Creando cuenta...';
-
     const { error } = await db.auth.signUp({
         email, password: pass,
         options: { data: { nombre: name, telefono: phone } }
@@ -444,9 +472,7 @@ async function doRegister() {
     }
 }
 
-// ── FORGOT PASSWORD ───────────────────────────────────────────────────
-// Supabase manda un link al correo → el usuario llega de vuelta con
-// event PASSWORD_RECOVERY en onAuthStateChange → mostramos pantalla de reset.
+// ── RECUPERAR CONTRASEÑA ───────────────────────────────────
 async function doResetPassword() {
     const email = document.getElementById('login-email').value.trim();
     const msg   = document.getElementById('login-msg');
@@ -455,7 +481,7 @@ async function doResetPassword() {
     }
     msg.className = 'auth-msg'; msg.textContent = 'Enviando correo...';
     const { error } = await db.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.href   // regresa a esta misma página
+        redirectTo: window.location.href
     });
     if (error) {
         msg.className = 'auth-msg error'; msg.textContent = 'Error: ' + error.message;
@@ -485,22 +511,20 @@ async function doUpdatePassword() {
     }
 }
 
-// ── LOGOUT ────────────────────────────────────────────────────────────
+// ── LOGOUT ─────────────────────────────────────────────────
 async function doLogout() {
     await db.auth.signOut();
     location.reload();
 }
 
-// ── SESSION ───────────────────────────────────────────────────────────
+// ── SESSION ────────────────────────────────────────────────
 db.auth.onAuthStateChange(async (event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
-        // El usuario llegó desde el link del correo de recuperación
         document.getElementById('auth-section').style.display     = 'none';
         document.getElementById('recovery-section').style.display = 'flex';
         document.getElementById('app-section').classList.add('hidden');
         return;
     }
-
     if (session?.user) {
         currentUser = session.user;
         document.getElementById('auth-section').style.display     = 'none';
@@ -515,7 +539,7 @@ db.auth.onAuthStateChange(async (event, session) => {
     }
 });
 
-// ── RIDERS ────────────────────────────────────────────────────────────
+// ── RIDERS ─────────────────────────────────────────────────
 async function loadRiders() {
     const { data } = await db
         .from('riders')
@@ -542,8 +566,8 @@ function renderRiders() {
     if (!count) {
         list.innerHTML = `
         <div class="empty-state">
-            <div class="icon">No tienes bickers registrados.</div>
-            <p>Aún no tienes riders registrados.<br>Toca "Agregar bicker" para comenzar.</p>
+            <div class="icon">🏍️</div>
+            <p>Aún no tienes riders registrados.<br>Toca "Agregar rider" para comenzar.</p>
         </div>`;
         return;
     }
@@ -562,17 +586,15 @@ function renderRiders() {
         <div class="rider-actions">
             <button class="btn-icon-action" onclick="openQR('${r.id}')">Mostrar QR</button>
             <button class="btn-icon-action" onclick="openEditModal('${r.id}')">Editar</button>
-            <button class="btn-icon-action" 
-                data-id="${r.id}" 
-                data-nombre="${r.nombre.replace(/"/g, '&quot;')}" 
-                onclick="deleteRider(this)">
-                    Eliminar
-            </button>
+            <button class="btn-icon-action"
+                data-id="${r.id}"
+                data-nombre="${r.nombre.replace(/"/g, '&quot;')}"
+                onclick="deleteRider(this)">Eliminar</button>
         </div>
     </div>`).join('');
 }
 
-// ── ADD / EDIT ────────────────────────────────────────────────────────
+// ── ADD / EDIT ─────────────────────────────────────────────
 function openAddModal() {
     if (riders.length >= RIDER_LIMIT) return;
     editingId = null;
@@ -589,15 +611,15 @@ function openEditModal(id) {
     const r = riders.find(x => x.id === id);
     if (!r) return;
     document.getElementById('modal-title').textContent = 'Editar Rider';
-    document.getElementById('f-nombre').value       = r.nombre            || '';
-    document.getElementById('f-sangre').value       = r.tipo_sangre       || '';
-    document.getElementById('f-condiciones').value  = r.condiciones       || '';
-    document.getElementById('f-medicamentos').value = r.medicamentos      || '';
-    document.getElementById('f-alergias').value     = r.alergias          || '';
+    document.getElementById('f-nombre').value       = r.nombre       || '';
+    document.getElementById('f-sangre').value       = r.tipo_sangre  || '';
+    document.getElementById('f-condiciones').value  = r.condiciones  || '';
+    document.getElementById('f-medicamentos').value = r.medicamentos || '';
+    document.getElementById('f-alergias').value     = r.alergias     || '';
     document.getElementById('form-msg').textContent = '';
     document.getElementById('rider-modal').classList.remove('hidden');
     setTimeout(() => document.getElementById('f-nombre').focus(), 100);
-    }
+}
 
 async function saveRider() {
     const nombre      = document.getElementById('f-nombre').value.trim();
@@ -609,8 +631,6 @@ async function saveRider() {
         msg.textContent = 'Nombre y tipo de sangre son obligatorios.';
         return;
     }
-
-  // Límite de 50 al guardar (doble check)
     if (!editingId && riders.length >= RIDER_LIMIT) {
         msg.className = 'form-msg error';
         msg.textContent = `Límite de ${RIDER_LIMIT} riders alcanzado.`;
@@ -623,21 +643,18 @@ async function saveRider() {
     const payload  = {
         nombre,
         tipo_sangre,
-        condiciones:  document.getElementById('f-condiciones').value.trim()  || null,
-        medicamentos: document.getElementById('f-medicamentos').value.trim() || null,
-        alergias:     document.getElementById('f-alergias').value.trim()     || null,
+        condiciones:   document.getElementById('f-condiciones').value.trim()  || null,
+        medicamentos:  document.getElementById('f-medicamentos').value.trim() || null,
+        alergias:      document.getElementById('f-alergias').value.trim()     || null,
         telefono_jefe: jefeData?.telefono || null,
-        jefe_id:      currentUser.id,
+        jefe_id:       currentUser.id,
     };
 
     let error;
     if (editingId) {
         ({ error } = await db.from('riders').update(payload).eq('id', editingId));
     } else {
-        payload.token_qr = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-            const r = Math.random() * 16 | 0;
-            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-        });
+        payload.token_qr    = genUUID();
         payload.token_activo = true;
         ({ error } = await db.from('riders').insert(payload));
     }
@@ -658,47 +675,123 @@ async function deleteRider(btn) {
     loadRiders();
 }
 
-// ── QR ────────────────────────────────────────────────────────────────
+// ── QR ─────────────────────────────────────────────────────
 async function openQR(id) {
     qrRiderId = id;
     const r   = riders.find(x => x.id === id);
     if (!r) return;
     document.getElementById('qr-modal-sub').textContent = r.nombre;
-    document.getElementById('qr-msg').textContent = '';
+    document.getElementById('qr-msg').textContent       = '';
+    document.getElementById('qr-msg').className         = 'form-msg';
     document.getElementById('qr-modal').classList.remove('hidden');
     renderQRCanvas(r.token_qr);
 }
 
 function renderQRCanvas(token) {
-    const url    = `${BASE_URL}?token=${token}`;
-    const qrUrl  = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&color=0f0f0f&bgcolor=ffffff&data=${encodeURIComponent(url)}`;
-    const wrap   = document.getElementById('qr-wrap');
-    wrap.innerHTML = `<img id="qr-img" src="${qrUrl}" width="240" height="240" style="border-radius:12px">`;
+    const url   = `${BASE_URL}?token=${token}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&color=0f0f0f&bgcolor=ffffff&data=${encodeURIComponent(url)}`;
+    document.getElementById('qr-wrap').innerHTML =
+        `<img id="qr-img" src="${qrUrl}" width="240" height="240" style="border-radius:12px">`;
 }
 
-function downloadQR() {
-    const img  = document.getElementById('qr-img');
-    const r    = riders.find(x => x.id === qrRiderId);
+// ── COMPARTIR QR POR WHATSAPP ─────────────────────────────
+async function shareQR() {
+    const r   = riders.find(x => x.id === qrRiderId);
+    const msg = document.getElementById('qr-msg');
+    if (!r) return;
+
+    const qrPageUrl = `${BASE_URL}?token=${r.token_qr}`;
+    // Número del jefe: limpiamos todo excepto dígitos, agregamos lada MX si es necesario
+    let tel = (r.telefono_jefe || '').replace(/\D/g, '');
+    if (tel.length === 10) tel = '52' + tel;   // agrega lada México
+
+    const waText = encodeURIComponent(
+        `🏍️ *QR de emergencia — ${r.nombre}*\n\n` +
+        `Escanea este código para ver su información médica en caso de accidente:\n` +
+        `${qrPageUrl}`
+    );
+
+    // 1) Intentar Web Share API (comparte la imagen real desde el carrete)
+    const imgEl = document.getElementById('qr-img');
+    if (imgEl && navigator.share) {
+        try {
+            msg.className = 'form-msg'; msg.textContent = 'Preparando imagen...';
+            const response = await fetch(imgEl.src);
+            const blob     = await response.blob();
+            const file     = new File([blob], `QR_${r.nombre.replace(/\s+/g,'_')}.png`, { type: 'image/png' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: `QR de emergencia — ${r.nombre}`,
+                    text: `QR médico de ${r.nombre}\n${qrPageUrl}`
+                });
+                msg.className = 'form-msg success'; msg.textContent = '¡QR compartido!';
+                return;
+            }
+        } catch (e) {
+            // usuario canceló o el navegador no soporta — caemos al fallback
+            if (e.name === 'AbortError') {
+                msg.className = 'form-msg'; msg.textContent = '';
+                return;
+            }
+        }
+    }
+
+    // 2) Fallback: abrir WhatsApp con el link del QR al número del jefe
+    msg.className = 'form-msg'; msg.textContent = 'Abriendo WhatsApp...';
+    const waUrl = tel
+        ? `https://wa.me/${tel}?text=${waText}`
+        : `https://wa.me/?text=${waText}`;
+
     const link = document.createElement('a');
-    link.download = `QR_${(r?.nombre || 'rider').replace(/\s+/g, '_')}.png`;
-    link.href = img.src;
+    link.href = waUrl; link.target = '_blank'; link.rel = 'noopener';
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => { msg.textContent = ''; }, 2000);
 }
 
+// ── REGENERAR QR (FIX) ────────────────────────────────────
 async function regenQR() {
-    if (!confirm('Desea generar un nuevo QR? El QR anterior dejará de funcionar.')) return;
-    const msg      = document.getElementById('qr-msg');
-    msg.textContent = 'Generando...';
-    const newToken  = crypto.randomUUID();
-    const { error } = await db.from('riders')
+    if (!confirm('¿Generar un nuevo QR? El QR anterior dejará de funcionar.')) return;
+
+    const msg  = document.getElementById('qr-msg');
+    const btn  = document.getElementById('btn-regen');
+
+    msg.className  = 'form-msg';
+    msg.textContent = 'Generando nuevo QR...';
+    btn.disabled   = true;
+
+    const newToken   = genUUID();
+    const { error }  = await db
+        .from('riders')
         .update({ token_qr: newToken })
         .eq('id', qrRiderId);
-    if (error) { msg.textContent = 'Error al generar el nuevo QR.'; return; }
-    await loadRiders();
+
+    if (error) {
+        console.error('regenQR error:', error);
+        msg.className  = 'form-msg error';
+        msg.textContent = 'Error al generar el QR: ' + error.message;
+        btn.disabled   = false;
+        return;
+    }
+
+    await loadRiders();   // refresca el array local con el nuevo token
     const updated = riders.find(x => x.id === qrRiderId);
+
+    if (!updated) {
+        msg.className  = 'form-msg error';
+        msg.textContent = 'No se encontró el rider actualizado.';
+        btn.disabled   = false;
+        return;
+    }
+
     renderQRCanvas(updated.token_qr);
     msg.className  = 'form-msg success';
-    msg.textContent = 'Se genero un nuevo QR.';
+    msg.textContent = '✓ Nuevo QR generado correctamente.';
+    btn.disabled   = false;
 }
 
 function closeModal(id) {
