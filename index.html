@@ -753,49 +753,87 @@ async function shareQR() {
     setTimeout(() => { msg.textContent = ''; }, 2000);
 }
 
-// ── REGENERAR QR (FIX) ────────────────────────────────────
+// ── REGENERAR QR ──────────────────────────────────────────
+// Usa doble toque en lugar de confirm() — iOS Safari bloquea
+// los diálogos nativos en ciertos contextos y devuelve false.
+let regenPendingConfirm = false;
+let regenConfirmTimer   = null;
+
 async function regenQR() {
-    if (!confirm('¿Generar un nuevo QR? El QR anterior dejará de funcionar.')) return;
+    const msg = document.getElementById('qr-msg');
+    const btn = document.getElementById('btn-regen');
 
-    const msg  = document.getElementById('qr-msg');
-    const btn  = document.getElementById('btn-regen');
+    // — Primer toque: pedir confirmación inline —
+    if (!regenPendingConfirm) {
+        regenPendingConfirm    = true;
+        btn.textContent        = '¿Confirmar? Toca de nuevo';
+        btn.style.borderColor  = '#D7263D';
+        btn.style.color        = '#D7263D';
+        msg.className          = 'form-msg';
+        msg.textContent        = 'El QR anterior dejará de funcionar.';
 
-    msg.className  = 'form-msg';
+        // Si no confirma en 4 s, resetear
+        regenConfirmTimer = setTimeout(() => resetRegenBtn(btn, msg), 4000);
+        return;
+    }
+
+    // — Segundo toque: ejecutar —
+    clearTimeout(regenConfirmTimer);
+    regenPendingConfirm = false;
+    resetRegenBtn(btn, msg);
+
+    msg.className   = 'form-msg';
     msg.textContent = 'Generando nuevo QR...';
-    btn.disabled   = true;
+    btn.disabled    = true;
 
-    const newToken   = genUUID();
-    const { error }  = await db
+    const newToken  = genUUID();
+    const { error } = await db
         .from('riders')
         .update({ token_qr: newToken })
         .eq('id', qrRiderId);
 
     if (error) {
         console.error('regenQR error:', error);
-        msg.className  = 'form-msg error';
+        msg.className   = 'form-msg error';
         msg.textContent = 'Error al generar el QR: ' + error.message;
-        btn.disabled   = false;
+        btn.disabled    = false;
         return;
     }
 
-    await loadRiders();   // refresca el array local con el nuevo token
+    await loadRiders();
     const updated = riders.find(x => x.id === qrRiderId);
 
     if (!updated) {
-        msg.className  = 'form-msg error';
+        msg.className   = 'form-msg error';
         msg.textContent = 'No se encontró el rider actualizado.';
-        btn.disabled   = false;
+        btn.disabled    = false;
         return;
     }
 
     renderQRCanvas(updated.token_qr);
-    msg.className  = 'form-msg success';
+    msg.className   = 'form-msg success';
     msg.textContent = '✓ Nuevo QR generado correctamente.';
-    btn.disabled   = false;
+    btn.disabled    = false;
+}
+
+function resetRegenBtn(btn, msg) {
+    regenPendingConfirm   = false;
+    btn.textContent       = '🔄 Generar nuevo QR';
+    btn.style.borderColor = '';
+    btn.style.color       = '';
+    if (msg && msg.textContent === 'El QR anterior dejará de funcionar.') {
+        msg.textContent = '';
+    }
 }
 
 function closeModal(id) {
     document.getElementById(id).classList.add('hidden');
+    if (id === 'qr-modal') {
+        clearTimeout(regenConfirmTimer);
+        const btn = document.getElementById('btn-regen');
+        const msg = document.getElementById('qr-msg');
+        resetRegenBtn(btn, msg);
+    }
 }
 
 // Cerrar al tocar el fondo del overlay
